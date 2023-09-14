@@ -1,0 +1,27 @@
+# import DeepChem
+import deepchem as dc
+
+# load Delaney dataset - measured log solubility in molecules per liter and featurizer for molecules
+
+tasks, datasets, transformers = dc.molnet.load_delaney(featurizer = 'GraphConv')
+train, valid, tests = datasets
+
+print(train.X.shape)
+print(train.y.shape)
+print(train.w.shape)
+print(tests.X.shape)
+
+# featuring molecules and change defoult mode on regression  
+model=dc.models.GraphConvModel(n_tasks=1, mode='regression', graph_conv_layers=[128, 128], dropout=0.20)
+
+# how many time you are passing set of data
+model.fit(train, nb_epoch=100)
+
+# evaluate model from dataset using metrics
+
+metrics=dc.metrics.Metric(dc.metrics.pearson_r2_score)
+train_scores = model.evaluate(train, [metrics], transformers)
+print(train_scores)
+
+test_score = model.evaluate(train, [metrics], transformers)
+print(test_score)
